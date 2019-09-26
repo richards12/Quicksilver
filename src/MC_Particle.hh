@@ -88,6 +88,12 @@ class MC_Particle
     // When crossing a facet, keep the surface normal dot product
     double normal_dot;
 
+  double distanceToCensus;
+  double distanceToFacet;
+  double distanceToReaction;
+
+  int forceCollision;
+  
 public:
    HOST_DEVICE_CUDA
    MC_Particle();
