@@ -22,6 +22,7 @@ public:
    void reserve(size_t n)
    { 
        _particles.reserve(n,VAR_MEM); 
+       _convertedParticles.reserve(n,VAR_MEM); 
    }
 
    // Add all particles in a 2nd vault into this vault.
@@ -53,7 +54,11 @@ public:
    // Get a particle from the vault.
    bool popParticle(MC_Particle &particle);
 
-   // Get a particle from the vault 
+   HOST_DEVICE_CUDA
+   MC_Particle& MC_get_Particle(int particle_index){  return _convertedParticles[particle_index];}
+
+
+// Get a particle from the vault 
    bool getBaseParticleComm(MC_Base_Particle &particle, int index);
    HOST_DEVICE_CUDA
    bool getParticle(MC_Particle &particle, int index);
@@ -75,12 +80,14 @@ public:
 
    // Swaps this particle at index with last particle and resizes to delete it
    void eraseSwapParticle(int index);
+   qs_vector<MC_Particle> _convertedParticles;
 
 private:
 
    // The container of particles.
    qs_vector<MC_Base_Particle> _particles;
 };
+
 
 // -----------------------------------------------------------------------
 HOST_DEVICE_CUDA
@@ -208,5 +215,6 @@ eraseSwapParticle(int index)
 HOST_DEVICE
 void MC_Load_Particle(MonteCarlo *mcco, MC_Particle &mc_particle, ParticleVault *particleVault, int particle_index);
 HOST_DEVICE_END
+
 
 #endif

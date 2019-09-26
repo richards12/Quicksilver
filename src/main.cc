@@ -121,6 +121,13 @@ void cycleInit( bool loadBalance )
 }
 
 
+HOST_DEVICE
+void makeParticlesGuts(MonteCarlo* monteCarlo, int ii, ParticleVault* vv)
+{
+  MC_Load_Particle(monteCarlo, vv->_convertedParticles[ii], vv, ii);
+}
+
+
 #if defined (HAVE_CUDA)
 
 __global__ void CycleTrackingKernel( MonteCarlo* monteCarlo, int num_particles, ParticleVault* processingVault, ParticleVault* processedVault )
@@ -130,6 +137,17 @@ __global__ void CycleTrackingKernel( MonteCarlo* monteCarlo, int num_particles, 
     if( global_index < num_particles )
     {
         CycleTrackingGuts( monteCarlo, global_index, processingVault, processedVault );
+    }
+}
+
+
+__global__ void makeParticlesKernel(MonteCarlo* monteCarlo, int num_particles, ParticleVault* processingVault)
+{
+   int global_index = getGlobalThreadID(); 
+
+    if( global_index < num_particles )
+    {
+      makeParticlesGuts(monteCarlo,  global_index, processingVault);
     }
 }
 
@@ -190,8 +208,10 @@ void cycleTracking(MonteCarlo *monteCarlo)
                           
                           //Call Cycle Tracking Kernel
                           if( runKernel )
-                             CycleTrackingKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault, processedVault );
-                          
+			    {
+			      makeParticlesKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault);
+			      CycleTrackingKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault, processedVault );
+			    }
                           //Synchronize the stream so that memory is copied back before we begin MPI section
                           cudaPeekAtLastError();
                           cudaDeviceSynchronize();
@@ -214,6 +234,13 @@ void cycleTracking(MonteCarlo *monteCarlo)
                           #endif
                           for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
                           {
+                             makeParticlesGuts( monteCarlo, particle_index, processingVault );
+                          }
+                          #ifdef HAVE_OPENMP_TARGET
+                          #pragma omp target teams distribute parallel for num_teams(nteams) thread_limit(128)
+                          #endif
+                          for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
+                          {
                              CycleTrackingGuts( monteCarlo, particle_index, processingVault, processedVault );
                           }
                           #ifdef HAVE_OPENMP_TARGET
@@ -225,6 +252,11 @@ void cycleTracking(MonteCarlo *monteCarlo)
                        break;
 
                       case cpu:
+                      #include "mc_omp_parallel_for_schedule_static.hh"
+                      for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
+		       {
+			 makeParticlesGuts( monteCarlo, particle_index, processingVault );
+                       }
                        #include "mc_omp_parallel_for_schedule_static.hh"
                        for ( int particle_index = 0; particle_index < numParticles; particle_index++ )
                        {

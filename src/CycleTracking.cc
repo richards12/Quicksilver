@@ -14,10 +14,11 @@
 HOST_DEVICE
 void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVault *processingVault, ParticleVault *processedVault )
 {
-    MC_Particle mc_particle;
+  //    MC_Particle mc_particle;
 
     // Copy a single particle from the particle vault into mc_particle
-    MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
+    //    MC_Load_Particle(monteCarlo, mc_particle, processingVault, particle_index);
+    MC_Particle mc_particle = processingVault->MC_get_Particle(particle_index);
 
     // set the particle.task to the index of the processed vault the particle will census into.
     mc_particle.task = 0;//processed_vault;
