@@ -20,6 +20,12 @@ static inline unsigned int MC_Find_Min(const double *array,
                                        int     num_elements);
 HOST_DEVICE_END
 
+
+
+
+
+
+
 //--------------------------------------------------------------------------------------------------
 //  Routine MC_Segment_Outcome determines whether the next segment of the particle's trajectory will result in:
 //    (i) collision within the current cell,
@@ -99,34 +105,37 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
     distance[MC_Segment_Outcome_type::Census] = particle_speed*mc_particle.time_to_census;
 
 
-    //  DEBUG  Turn off threshold for now
-    double distance_threshold = 10.0 * PhysicalConstants::_hugeDouble;
-    // Get the current winning distance.
-    double current_best_distance = PhysicalConstants::_hugeDouble;
+    // //  DEBUG  Turn off threshold for now
+    // double distance_threshold = 10.0 * PhysicalConstants::_hugeDouble;
+    // // Get the current winning distance.
+    // double current_best_distance = PhysicalConstants::_hugeDouble;
 
-    DirectionCosine *direction_cosine = mc_particle.Get_Direction_Cosine();
+    // DirectionCosine *direction_cosine = mc_particle.Get_Direction_Cosine();
 
-    bool new_segment =  (mc_particle.num_segments == 0 ||
-                         mc_particle.last_event == MC_Tally_Event::Collision);
+    // bool new_segment =  (mc_particle.num_segments == 0 ||
+    //                      mc_particle.last_event == MC_Tally_Event::Collision);
 
-    MC_Location location(mc_particle.Get_Location());
+    // MC_Location location(mc_particle.Get_Location());
 
-    // Calculate the minimum distance to each facet of the cell.
-    MC_Nearest_Facet nearest_facet;
-        nearest_facet = MCT_Nearest_Facet(&mc_particle, location, mc_particle.coordinate,
-                                  direction_cosine, distance_threshold, current_best_distance, new_segment, monteCarlo);
+    // // Calculate the minimum distance to each facet of the cell.
+    // MC_Nearest_Facet nearest_facet;
+    //     nearest_facet = MCT_Nearest_Facet(&mc_particle, location, mc_particle.coordinate,
+    //                               direction_cosine, distance_threshold, current_best_distance, new_segment, monteCarlo);
 
-    mc_particle.normal_dot = nearest_facet.dot_product;
+    // mc_particle.normal_dot = nearest_facet.dot_product;
 
-    distance[MC_Segment_Outcome_type::Facet_Crossing] = nearest_facet.distance_to_facet;
+    // distance[MC_Segment_Outcome_type::Facet_Crossing] = nearest_facet.distance_to_facet;
 
 
-    // Get out of here if the tracker failed to bound this particle's volume.
-    if (mc_particle.last_event == MC_Tally_Event::Facet_Crossing_Tracking_Error)
-    {
-        return MC_Segment_Outcome_type::Facet_Crossing;
-    }
+    // // Get out of here if the tracker failed to bound this particle's volume.
+     if (mc_particle.last_event == MC_Tally_Event::Facet_Crossing_Tracking_Error)
+     {
+         return MC_Segment_Outcome_type::Facet_Crossing;
+     }
 
+    distance[MC_Segment_Outcome_type::Facet_Crossing] = mc_particle.distanceToFacet;
+
+    
     // Calculate the minimum distance to the selected events.
 
     // Force a collision (if required).
@@ -182,7 +191,7 @@ MC_Segment_Outcome_type::Enum MC_Segment_Outcome(MonteCarlo* monteCarlo, MC_Part
     }
     else if (segment_outcome == MC_Segment_Outcome_type::Facet_Crossing)
     {
-        mc_particle.facet = nearest_facet.facet;
+        mc_particle.facet = mc_particle.nearestFacet;
     }
     else if (segment_outcome == MC_Segment_Outcome_type::Census)
     {

@@ -93,6 +93,7 @@ class MC_Particle
   double distanceToReaction;
 
   int forceCollision;
+  int nearestFacet;
   
 public:
    HOST_DEVICE_CUDA

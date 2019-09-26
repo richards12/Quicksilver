@@ -12,3 +12,10 @@ HOST_DEVICE_END
 HOST_DEVICE
 void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, int particle_index, ParticleVault* processingVault, ParticleVault* processedVault);
 HOST_DEVICE_END
+
+HOST_DEVICE
+void facetDistanceGuts(MonteCarlo* monteCarlo, int particle_index, ParticleVault* vv);
+HOST_DEVICE_END
+
+
+

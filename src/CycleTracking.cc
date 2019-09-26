@@ -10,6 +10,10 @@
 #include "AtomicMacro.hh"
 #include "macros.hh"
 #include "qs_assert.hh"
+#include "PhysicalConstants.hh"
+#include "MCT.hh"
+#include "MC_Nearest_Facet.hh"
+
 
 HOST_DEVICE
 void CycleTrackingGuts( MonteCarlo *monteCarlo, int particle_index, ParticleVault *processingVault, ParticleVault *processedVault )
@@ -123,3 +127,34 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
 }
 HOST_DEVICE_END
 
+
+
+HOST_DEVICE
+void facetDistanceGuts(MonteCarlo* monteCarlo, int particle_index, ParticleVault* vv)
+{
+
+  MC_Particle& mc_particle = vv->_convertedParticles[particle_index];
+
+  //  DEBUG  Turn off threshold for now
+    double distance_threshold = 10.0 * PhysicalConstants::_hugeDouble;
+    // Get the current winning distance.
+    double current_best_distance = PhysicalConstants::_hugeDouble;
+
+    DirectionCosine *direction_cosine = mc_particle.Get_Direction_Cosine();
+
+    bool new_segment =  (mc_particle.num_segments == 0 ||
+                         mc_particle.last_event == MC_Tally_Event::Collision);
+
+    MC_Location location(mc_particle.Get_Location());
+
+    // Calculate the minimum distance to each facet of the cell.
+    MC_Nearest_Facet nearest_facet;
+        nearest_facet = MCT_Nearest_Facet(&mc_particle, location, mc_particle.coordinate,
+                                  direction_cosine, distance_threshold, current_best_distance, new_segment, monteCarlo);
+
+    mc_particle.normal_dot = nearest_facet.dot_product;
+
+    mc_particle.distanceToFacet = nearest_facet.distance_to_facet;
+    mc_particle.nearestFacet = nearest_facet.facet;
+}
+HOST_DEVICE_END

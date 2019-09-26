@@ -151,6 +151,16 @@ __global__ void makeParticlesKernel(MonteCarlo* monteCarlo, int num_particles, P
     }
 }
 
+__global__ void facetDistanceKernel(MonteCarlo* monteCarlo, int num_particles, ParticleVault* processingVault)
+{
+   int global_index = getGlobalThreadID(); 
+
+    if( global_index < num_particles )
+    {
+      facetDistanceGuts(monteCarlo,  global_index, processingVault);
+    }
+}
+
 #endif
 
 void cycleTracking(MonteCarlo *monteCarlo)
@@ -210,6 +220,7 @@ void cycleTracking(MonteCarlo *monteCarlo)
                           if( runKernel )
 			    {
 			      makeParticlesKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault);
+			      facetDistanceKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault);
 			      CycleTrackingKernel<<<grid, block >>>( monteCarlo, numParticles, processingVault, processedVault );
 			    }
                           //Synchronize the stream so that memory is copied back before we begin MPI section
