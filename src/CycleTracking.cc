@@ -33,12 +33,12 @@ HOST_DEVICE_END
 HOST_DEVICE
 void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, int particle_index, ParticleVault* processingVault, ParticleVault* processedVault)
 {
-    bool keepTrackingThisParticle = false;
+  //    bool keepTrackingThisParticle = false;
     unsigned int tally_index =      (particle_index) % monteCarlo->_tallies->GetNumBalanceReplications();
     unsigned int flux_tally_index = (particle_index) % monteCarlo->_tallies->GetNumFluxReplications();
     unsigned int cell_tally_index = (particle_index) % monteCarlo->_tallies->GetNumCellTallyReplications();
-    do
-    {
+    //   do
+    // {
         // Determine the outcome of a particle at the end of this segment such as:
         //
         //   (0) Undergo a collision within the current cell,
@@ -63,11 +63,11 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
             if (CollisionEvent(monteCarlo, mc_particle, tally_index ) == MC_Collision_Event_Return::Continue_Tracking)
             {
 	      monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
-	      keepTrackingThisParticle = false;
+	      //	      keepTrackingThisParticle = false;
             }
             else
             {
-                keepTrackingThisParticle = false;
+	      //                keepTrackingThisParticle = false;
             }
             }
             break;
@@ -80,26 +80,26 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
                 {
 		  monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
-                    keepTrackingThisParticle = false;  // Transit Event
+		  //                    keepTrackingThisParticle = false;  // Transit Event
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Escape)
                 {
                     ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._escape);
                     mc_particle.last_event = MC_Tally_Event::Facet_Crossing_Escape;
                     mc_particle.species = -1;
-                    keepTrackingThisParticle = false;
+		    //                    keepTrackingThisParticle = false;
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
                     MCT_Reflect_Particle(monteCarlo, mc_particle);
 		    monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
-                    keepTrackingThisParticle = false;
+		    //                    keepTrackingThisParticle = false;
                 }
                 else
                 {
                     // Enters an adjacent cell in an off-processor domain.
                     //mc_particle.species = -1;
-                    keepTrackingThisParticle = false;
+		  //                    keepTrackingThisParticle = false;
                 }
             }
             break;
@@ -109,7 +109,7 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
                 // The particle has reached the end of the time step.
                 processedVault->pushParticle(mc_particle);
                 ATOMIC_UPDATE( monteCarlo->_tallies->_balanceTask[tally_index]._census);
-                keepTrackingThisParticle = false;
+		//                keepTrackingThisParticle = false;
                 break;
             }
             
@@ -118,7 +118,7 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
            break;  // should this be an error
         }
     
-    } while ( keepTrackingThisParticle );
+	//    } while ( keepTrackingThisParticle );
 }
 HOST_DEVICE_END
 
