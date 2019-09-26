@@ -62,7 +62,8 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
             //   (1) Exactly one same-species secondary particle.
             if (CollisionEvent(monteCarlo, mc_particle, tally_index ) == MC_Collision_Event_Return::Continue_Tracking)
             {
-                keepTrackingThisParticle = true;
+	      monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
+	      keepTrackingThisParticle = false;
             }
             else
             {
@@ -78,7 +79,8 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
 
                 if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Transit_Exit)
                 {
-                    keepTrackingThisParticle = true;  // Transit Event
+		  monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
+                    keepTrackingThisParticle = false;  // Transit Event
                 }
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Escape)
                 {
@@ -90,7 +92,8 @@ void CycleTrackingFunction( MonteCarlo *monteCarlo, MC_Particle &mc_particle, in
                 else if (facet_crossing_type == MC_Tally_Event::Facet_Crossing_Reflection)
                 {
                     MCT_Reflect_Particle(monteCarlo, mc_particle);
-                    keepTrackingThisParticle = true;
+		    monteCarlo->_particleVaultContainer->addExtraParticle(mc_particle);
+                    keepTrackingThisParticle = false;
                 }
                 else
                 {
