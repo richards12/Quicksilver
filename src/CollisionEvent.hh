@@ -2,11 +2,11 @@
 #define COLLISION_EVENT_HH
 
 class MonteCarlo;
-class MC_Particle;
+class MC_Base_Particle;
 
 #include "DeclareMacro.hh"
 HOST_DEVICE
-bool CollisionEvent(MonteCarlo* monteCarlo, MC_Particle &mc_particle, unsigned int tally_index );
+bool CollisionEvent(MonteCarlo* monteCarlo, MC_Base_Particle &mc_particle, unsigned int tally_index );
 HOST_DEVICE_END
 
 

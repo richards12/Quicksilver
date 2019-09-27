@@ -339,7 +339,7 @@ addProcessingParticle( MC_Base_Particle &particle, uint64_t &fill_vault_index )
 //--------------------------------------------------------------
 HOST_DEVICE
 void ParticleVaultContainer::
-addExtraParticle( MC_Particle &particle)
+addExtraParticle( MC_Base_Particle &particle)
 {
     uint64_cu index = 0;
     ATOMIC_CAPTURE( this->_extraVaultIndex, 1, index ); 
